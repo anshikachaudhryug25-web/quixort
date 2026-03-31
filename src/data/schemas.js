@@ -3,13 +3,17 @@ export const STUDENT_SCHEMA = [
     { key: 'name', label: 'Student Name' },
     { key: 'batch', label: 'Batch' },
     { key: 'major', label: 'Major' },
-    { key: 'gender', label: 'Gender Identification' },
+    { key: 'minor', label: 'Minor' },
+    { key: 'gender', label: 'Gender' },
     { key: 'status', label: 'Status' },
     { key: 'participation_score', label: 'Involvement Score' },
-    { key: 'applications', label: 'Apps' },
-    { key: 'rejections_count', label: 'Rejects' },
+    { key: 'applications', label: 'Total Apps' },
+    { key: 'rejections_count', label: 'Rejections' },
     { key: 'acceptance_rate', label: 'Accept %' },
     { key: 'joined', label: 'Societies Joined' },
+    { key: 'leadership_roles', label: 'Leadership Roles' },
+    { key: 'grievances_filed', label: 'Grievances Filed' },
+    { key: 'days_since_last_activity', label: 'Days Inactive' },
 ];
 
 export const CLUB_SCHEMA = [
@@ -20,6 +24,10 @@ export const CLUB_SCHEMA = [
     { key: 'members_count', label: 'Members' },
     { key: 'leadership_count', label: 'Core Team' },
     { key: 'applications_2024', label: '2024 Apps' },
+    { key: 'rejections_2024', label: '2024 Rejects' },
     { key: 'acceptance_rate', label: 'Accept %' },
+    { key: 'budget_total', label: 'Budget (₹)' },
+    { key: 'budget_used', label: 'Used (₹)' },
+    { key: 'budget_days_elapsed', label: 'Days Elapsed' },
     { key: 'status', label: 'Status' },
 ];

@@ -19,46 +19,11 @@ import { StudentProfile, ClubProfile } from './pages/Office/Profiles';
 
 // Student pages
 import StudentDashboard from './pages/Student/Dashboard';
+import ProfilePage from './pages/Student/Profile';
 import OfficeTeam from './pages/Student/OfficeTeam';
 
 // Clubs pages
 import ClubDashboard from './pages/Clubs/ClubDashboard';
-
-function UncoveringHiddenBias() {
-  return (
-    <>
-      <div className="page-header">
-        <h1 className="page-title">Privacy-Preserving Bias Graph</h1>
-        <p>Mapping systemic concentration of campus leadership.</p>
-      </div>
-      <div className="grid-cols-3" style={{ gridTemplateColumns: 'minmax(0, 1fr) 300px' }}>
-        <div className="card" style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-          <div style={{ position: 'relative', width: '300px', height: '300px' }}>
-            <svg viewBox="0 0 100 100" style={{ position: 'absolute', width: '100%', height: '100%' }}>
-              <circle cx="30" cy="40" r="15" fill="var(--accent-color)" fillOpacity="0.4" stroke="var(--accent-color)" strokeWidth="1" />
-              <circle cx="70" cy="60" r="18" fill="var(--danger-color)" fillOpacity="0.3" stroke="var(--danger-color)" strokeWidth="1" />
-              <circle cx="50" cy="50" r="8" fill="var(--warning-color)" fillOpacity="0.1" stroke="var(--warning-color)" strokeWidth="1" />
-            </svg>
-            <div style={{ position: 'absolute', top: '35%', left: '20%', fontSize: '0.75rem', color: 'white', fontWeight: 700 }}>Group A</div>
-            <div style={{ position: 'absolute', top: '55%', left: '60%', fontSize: '0.75rem', color: 'white', fontWeight: 700 }}>Group B</div>
-            <div style={{ position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', width: '100%' }}>
-              <p className="micro-copy">65% Overlap Detected Between A & B</p>
-            </div>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-title">Top Concentration</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div className="alert-item warning" style={{ margin: 0 }}><strong>Student X</strong>: 13 Roles</div>
-            <div className="alert-item warning" style={{ margin: 0 }}><strong>Student Y</strong>: 9 Roles</div>
-            <div className="alert-item warning" style={{ margin: 0 }}><strong>Student Z</strong>: 8 Roles</div>
-            <p className="micro-copy" style={{ marginTop: '1rem' }}>System detects leadership "bottlenecking". 5% of students hold 45% of leadership positions.</p>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
 
 export default function App() {
   const [view, setView] = useState(VIEWS.OFFICE);
@@ -77,7 +42,6 @@ export default function App() {
           <Route path="/office/events" element={<EventIntentBoard />} />
           <Route path="/office/feedback" element={<FeedbackSignals />} />
           <Route path="/office/feedback/:id" element={<FeedbackSignalDetail />} />
-          <Route path="/bias" element={<UncoveringHiddenBias />} />
 
           {/* Clubs */}
           <Route path="/club-management" element={<ClubDashboard />} />
@@ -139,9 +103,10 @@ export default function App() {
 
           {/* Student */}
           <Route path="/student-profile" element={<StudentDashboard />} />
-          <Route path="/student/discover" element={<div className="card"><h1>Discover Clubs</h1><p>Browse through all registered clubs and societies.</p></div>} />
-          <Route path="/student/events" element={<div className="card"><h1>Your Events</h1><p>Manage your registrations and RSVPs.</p></div>} />
-          <Route path="/student/feedback" element={<div className="card"><h1>Support & Feedback</h1><p>Direct channel to student office.</p></div>} />
+          <Route path="/student/profile" element={<ProfilePage />} />
+          <Route path="/student/discover" element={<div className="card"><h1>Explore Clubs/Socs</h1><p>Browse through all registered clubs and societies.</p></div>} />
+          <Route path="/student/events" element={<div className="card"><h1>Events</h1><p>Manage your registrations and RSVPs.</p></div>} />
+          <Route path="/student/feedback" element={<div className="card"><h1>Grievance/Feedback</h1><p>Direct channel to student office.</p></div>} />
           <Route path="/student/team" element={<OfficeTeam />} />
 
           <Route path="*" element={<OfficeDashboard />} />

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import {
-    CheckCircle
-} from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { MOCK_REIMBURSEMENTS } from '../../data/mockData';
 
 export default function OfficeReimbursements() {
@@ -10,6 +8,9 @@ export default function OfficeReimbursements() {
     const updateStatus = (id, newStatus) => {
         setReimbursements(reimbursements.map(r => r.id === id ? { ...r, status: newStatus } : r));
     };
+
+    const totalPending = reimbursements.filter(r => r.status !== 'Approved').reduce((s, r) => s + r.amount, 0);
+    const avgDaysPending = Math.round(reimbursements.filter(r => r.status !== 'Approved').reduce((s, r) => s + r.days_pending, 0) / Math.max(1, reimbursements.filter(r => r.status !== 'Approved').length));
 
     return (
         <>
@@ -24,13 +25,13 @@ export default function OfficeReimbursements() {
             <div className="grid-cols-4" style={{ marginBottom: '2rem' }}>
                 <div className="card" style={{ padding: '1.25rem' }}>
                     <div className="micro-copy" style={{ fontWeight: 700 }}>Total Pending</div>
-                    <div className="stat-value" style={{ fontSize: '1.5rem' }}>₹17,100</div>
-                    <p className="micro-copy">Across 3 active requests</p>
+                    <div className="stat-value" style={{ fontSize: '1.5rem' }}>₹{totalPending.toLocaleString()}</div>
+                    <p className="micro-copy">Across {reimbursements.filter(r => r.status !== 'Approved').length} active requests</p>
                 </div>
                 <div className="card" style={{ padding: '1.25rem' }}>
-                    <div className="micro-copy" style={{ fontWeight: 700 }}>Avg Audit Time</div>
-                    <div className="stat-value" style={{ fontSize: '1.5rem' }}>14 hrs</div>
-                    <p className="micro-copy">Selection to Approval</p>
+                    <div className="micro-copy" style={{ fontWeight: 700 }}>Avg Days Pending</div>
+                    <div className="stat-value" style={{ fontSize: '1.5rem' }}>{avgDaysPending} days</div>
+                    <p className="micro-copy">Submission to current status</p>
                 </div>
                 <div className="card" style={{ padding: '1.25rem' }}>
                     <div className="micro-copy" style={{ fontWeight: 700 }}>Budget Utilization</div>
@@ -55,8 +56,9 @@ export default function OfficeReimbursements() {
                                 <th>Amount</th>
                                 <th>Description</th>
                                 <th>Submission Date</th>
+                                <th>Days Pending</th>
                                 <th>Status</th>
-                                <th>Administrative Actions</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,11 +66,16 @@ export default function OfficeReimbursements() {
                                 <tr key={r.id}>
                                     <td style={{ fontWeight: 700 }}>{r.club}</td>
                                     <td><span className="badge outline" style={{ fontSize: '0.6rem' }}>{r.category}</span></td>
-                                    <td style={{ fontWeight: 800, color: 'var(--text-main)' }}>{r.amount}</td>
+                                    <td style={{ fontWeight: 800, color: 'var(--text-main)' }}>₹{r.amount.toLocaleString()}</td>
                                     <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={r.description}>
                                         {r.description}
                                     </td>
                                     <td>{r.date}</td>
+                                    <td>
+                                        <span style={{ color: r.days_pending > 4 ? 'var(--danger-color)' : r.days_pending > 2 ? 'var(--warning-color)' : 'var(--success-color)', fontWeight: 700 }}>
+                                            {r.days_pending === 0 ? '—' : `${r.days_pending}d`}
+                                        </span>
+                                    </td>
                                     <td>
                                         <span className={`badge ${r.status === 'Approved' ? 'success' : r.status === 'Reject' ? 'danger' : r.status === 'Review' ? 'warning' : 'accent'}`}>
                                             {r.status}
@@ -85,7 +92,7 @@ export default function OfficeReimbursements() {
                                             )}
                                             {r.status === 'Approved' && (
                                                 <div className="micro-copy" style={{ color: 'var(--success-color)', display: 'flex', alignItems: 'center' }}>
-                                                    <CheckCircle size={14} style={{ marginRight: '0.3rem' }} /> Transaction Closed
+                                                    <CheckCircle size={14} style={{ marginRight: '0.3rem' }} /> Closed
                                                 </div>
                                             )}
                                         </div>

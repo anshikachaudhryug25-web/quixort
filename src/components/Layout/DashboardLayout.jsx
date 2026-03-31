@@ -21,19 +21,20 @@ function Sidebar({ currentView }) {
                 ];
             case VIEWS.CLUBS:
                 return [
-                    { to: '/club-management', icon: LayoutDashboard, label: 'Control Hub' },
-                    { to: '/club-management/members', icon: Users, label: 'Personnel' },
+                    { to: '/club-management', icon: LayoutDashboard, label: 'Dashboard' },
+                    { to: '/club-management/members', icon: Users, label: 'Members' },
                     { to: '/club-management/induction', icon: FileText, label: 'Inductions' },
-                    { to: '/club-management/events', icon: Plus, label: 'Event Booking' },
-                    { to: '/club-management/reimbursement', icon: CreditCard, label: 'Fund Ledger' },
+                    { to: '/club-management/events', icon: Plus, label: 'Events' },
+                    { to: '/club-management/reimbursement', icon: CreditCard, label: 'Finances' },
                 ];
             case VIEWS.STUDENT:
                 return [
-                    { to: '/student-profile', icon: User, label: 'My Portfolio' },
-                    { to: '/student/discover', icon: Compass, label: 'Discover Socs' },
-                    { to: '/student/events', icon: Calendar, label: 'My Events' },
-                    { to: '/student/feedback', icon: MessageSquare, label: 'Support Desk' },
-                    { to: '/student/team', icon: Users, label: 'The Office Team' },
+                    { to: '/student-profile', icon: LayoutDashboard, label: 'Dashboard' },
+                    { to: '/student/profile', icon: User, label: 'Profile' },
+                    { to: '/student/discover', icon: Compass, label: 'Explore clubs/socs' },
+                    { to: '/student/events', icon: Calendar, label: 'Events' },
+                    { to: '/student/feedback', icon: MessageSquare, label: 'Grievance/Feedback' },
+                    { to: '/student/team', icon: Users, label: 'Office Team' },
                 ];
             default:
                 return [];
@@ -59,12 +60,7 @@ function Sidebar({ currentView }) {
                 ))}
 
                 <div style={{ marginTop: 'auto', padding: '1rem 0' }}>
-                    {currentView === VIEWS.OFFICE && (
-                        <NavLink to="/bias" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-                            <ShieldAlert size={20} />
-                            System Analytics
-                        </NavLink>
-                    )}
+                    {/* System Analytics moved to Dashboard */}
                 </div>
             </nav>
         </aside>
