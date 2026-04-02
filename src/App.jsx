@@ -24,6 +24,7 @@ import OfficeTeam from './pages/Student/OfficeTeam';
 
 // Clubs pages
 import ClubDashboard from './pages/Clubs/ClubDashboard';
+import ClubEventRequest from './pages/Clubs/ClubEventRequest';
 
 export default function App() {
   const [view, setView] = useState(VIEWS.OFFICE);
@@ -82,7 +83,7 @@ export default function App() {
               </div>
             </div>
           } />
-          <Route path="/club-management/events" element={<div className="card"><h1>New Event Request</h1><p>Submit request for venue and resources.</p></div>} />
+          <Route path="/club-management/events" element={<ClubEventRequest />} />
           <Route path="/club-management/reimbursement" element={
             <div className="card">
               <div className="flex-between" style={{ marginBottom: '1.5rem' }}>

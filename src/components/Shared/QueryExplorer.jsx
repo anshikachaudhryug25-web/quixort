@@ -176,7 +176,7 @@ export default function QueryExplorer({ data, schema, title, examples = [], targ
                     }}>
                         <div style={{ padding: '2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <h1 style={{ fontSize: '1.25rem', marginBottom: '0.25rem', color: '#fff' }}>Quick Filters</h1>
+                                <h1 style={{ fontSize: '1.25rem', marginBottom: '0.25rem', color: 'var(--header-text)' }}>Quick Filters</h1>
                                 <p className="micro-copy">Jump to curated administrative slices</p>
                             </div>
                             <button className="btn btn-outline" style={{ padding: '0.5rem', borderRadius: '50%', width: '40px', height: '40px' }} onClick={() => setShowDrawer(false)}>
@@ -218,14 +218,14 @@ export default function QueryExplorer({ data, schema, title, examples = [], targ
                                                 <div style={{
                                                     fontWeight: 800,
                                                     fontSize: '0.8rem',
-                                                    color: active ? '#fff' : ex.isUser ? 'var(--warning-color)' : 'var(--accent-color)',
+                                                    color: active ? 'var(--accent-color)' : ex.isUser ? 'var(--warning-color)' : 'var(--accent-color)',
                                                     letterSpacing: '0.04rem',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '0.5rem'
                                                 }}>
                                                     {ex.label.toUpperCase()}
-                                                    {active && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fff' }} />}
+                                                    {active && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--header-text)' }} />}
                                                 </div>
                                                 {ex.isUser && (
                                                     <Trash2
@@ -246,7 +246,7 @@ export default function QueryExplorer({ data, schema, title, examples = [], targ
                                     <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: 'var(--accent-color)' }}>
                                         <Inbox size={32} />
                                     </div>
-                                    <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '0.5rem' }}>No Quick Filters Saved</h3>
+                                    <h3 style={{ fontSize: '1rem', color: 'var(--header-text)', marginBottom: '0.5rem' }}>No Quick Filters Saved</h3>
                                     <p className="micro-copy">Start building a query and save it to see it appear here as a reusable shortcut.</p>
                                 </div>
                             )}

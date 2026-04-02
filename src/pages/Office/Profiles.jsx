@@ -94,6 +94,11 @@ export function ClubProfile() {
     const { id } = useParams();
     const navigate = useNavigate();
     const club = MOCK_CLUBS.find(c => c.name === id) || MOCK_CLUBS[0];
+    const [showAudit, setShowAudit] = React.useState(false);
+
+    if (!club) return <div>Organization not found</div>;
+
+    const budgetPercent = Math.round((club.budget_used / club.budget_total) * 100);
 
     return (
         <>
@@ -101,11 +106,10 @@ export function ClubProfile() {
                 <div>
                     <button className="btn btn-outline" style={{ marginBottom: '1rem' }} onClick={() => navigate(-1)}>← Back</button>
                     <h1 className="page-title">{club.name} Organizational Profile</h1>
-                    <p>{club.type} • Est. {club.founded}</p>
+                    <p>{club.category} • Est. {club.established}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="btn btn-outline">Audit Ledger</button>
-                    <button className="btn btn-primary">Policy Check</button>
+                    <button className="btn btn-outline" onClick={() => setShowAudit(true)}>Audit Ledger</button>
                 </div>
             </div>
 
@@ -118,17 +122,17 @@ export function ClubProfile() {
                 <div className="card">
                     <div className="micro-copy font-bold">Acceptance Rate</div>
                     <div className="stat-value" style={{ color: club.acceptance_rate < 20 ? 'var(--danger-color)' : 'inherit' }}>{club.acceptance_rate}%</div>
-                    <p className="micro-copy">Highly Selective</p>
+                    <p className="micro-copy">Selection Selectivity</p>
                 </div>
                 <div className="card">
                     <div className="micro-copy font-bold">Budget Utilization</div>
-                    <div className="stat-value">62%</div>
-                    <p className="micro-copy">FY24 Allocation</p>
+                    <div className="stat-value" style={{ color: budgetPercent > 80 ? 'var(--danger-color)' : 'inherit' }}>{budgetPercent}%</div>
+                    <p className="micro-copy">₹{club.budget_used.toLocaleString()} / ₹{club.budget_total.toLocaleString()}</p>
                 </div>
                 <div className="card">
-                    <div className="micro-copy font-bold">Resource Status</div>
-                    <div className="stat-value"><span className="badge success">{club.status}</span></div>
-                    <p className="micro-copy">Healthy Ops</p>
+                    <div className="micro-copy font-bold">Grievance Signal</div>
+                    <div className="stat-value" style={{ color: club.grievances_count > 0 ? 'var(--warning-color)' : 'inherit' }}>{club.grievances_count}</div>
+                    <p className="micro-copy">Direct Office Appeals</p>
                 </div>
             </div>
 
@@ -137,25 +141,76 @@ export function ClubProfile() {
                     <div className="card-title">Recent Induction Trends (Sept 2024)</div>
                     <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', gap: '1rem', padding: '1rem' }}>
                         {[40, 70, 90, 60, 80].map((h, i) => (
-                            <div key={i} style={{ flex: 1, background: 'var(--accent-color)', height: `${h}%`, borderRadius: '4px 4px 0 0' }}></div>
+                            <div key={i} style={{ flex: 1, background: 'var(--accent-color)', height: `${h}%`, borderRadius: '4px 4px 0 0', opacity: 0.8 + (i * 0.05) }}></div>
                         ))}
                     </div>
-                    <div className="flex-between micro-copy" style={{ padding: '0 1rem' }}>
+                    <div className="flex-between micro-copy" style={{ padding: '0.5rem 1rem' }}>
                         <span>Cycle P1</span><span>Cycle P2</span><span>Cycle P3</span><span>Cycle P4</span><span>Cycle P5</span>
                     </div>
                 </div>
                 <div className="card">
-                    <div className="card-title">Leadership Core</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {['Rahul Sharma', 'Anshika C.', 'Aman V.'].map(name => (
-                            <div key={name} className="flex-between glass-list-item">
-                                <span style={{ fontWeight: 600 }}>{name}</span>
-                                <span className="micro-copy">Core Member</span>
-                            </div>
-                        ))}
+                    <div className="card-title">Governance Metrics</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        <div>
+                            <div className="flex-between micro-copy mb-1"><span>Engagement</span><span>{club.avg_engagement}/10</span></div>
+                            <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px' }}><div style={{ width: `${club.avg_engagement * 10}%`, height: '100%', background: 'var(--success-color)', borderRadius: '3px' }}></div></div>
+                        </div>
+                        <div>
+                            <div className="flex-between micro-copy mb-1"><span>Diversity Score</span><span>{club.diversity_score}%</span></div>
+                            <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px' }}><div style={{ width: `${club.diversity_score}%`, height: '100%', background: 'var(--accent-color)', borderRadius: '3px' }}></div></div>
+                        </div>
+                        <div className="glass-list-item" style={{ fontSize: '0.75rem', marginTop: '0.5rem' }}>
+                            <strong>Lead:</strong> {club.lead}
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {showAudit && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+                    <div className="card" style={{ width: '600px', background: 'var(--card-bg)', border: '1px solid var(--border-color)', padding: '2.5rem' }}>
+                        <div className="flex-between mb-6">
+                            <div>
+                                <div className="card-title" style={{ margin: 0, fontSize: '1.25rem' }}>Audit Ledger: {club.name}</div>
+                                <p className="micro-copy">Fiscal velocity & spending forensics</p>
+                            </div>
+                            <button className="btn btn-outline" style={{ borderRadius: '50%', width: '32px', height: '32px', padding: 0 }} onClick={() => setShowAudit(false)}>×</button>
+                        </div>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <div className="micro-copy font-bold mb-4" style={{ color: 'var(--accent-color)', letterSpacing: '0.05em' }}>BUDGET EXHAUSTION TREND (MTD)</div>
+                            <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '0.75rem', position: 'relative', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                                {club.spending_trend.map((val, i) => (
+                                    <div key={i} style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>₹{val}</div>
+                                        <div style={{
+                                            width: '100%',
+                                            height: `${(val / club.budget_total) * 150}px`,
+                                            background: 'linear-gradient(to top, var(--accent-light), var(--accent-color))',
+                                            borderRadius: '6px 6px 0 0',
+                                            boxShadow: 'var(--glow-accent)'
+                                        }}></div>
+                                        <div className="micro-copy">Wk {i + 1}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="glass-list-item" style={{ borderLeft: '4px solid var(--accent-color)', padding: '1.25rem' }}>
+                            <div className="flex-between mb-2">
+                                <span style={{ fontWeight: 800, fontSize: '0.75rem', color: 'var(--accent-color)' }}>AI RISK ANALYSIS</span>
+                                <span className={`badge ${budgetPercent > 70 ? 'danger' : 'success'}`} style={{ fontSize: '0.6rem' }}>{budgetPercent}% Exhausted</span>
+                            </div>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-main)', lineHeight: 1.6 }}>{club.ai_insight}</p>
+                        </div>
+
+                        <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                            <button className="btn btn-primary" style={{ flex: 1 }}>Download Ledger</button>
+                            <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowAudit(false)}>Close Monitor</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

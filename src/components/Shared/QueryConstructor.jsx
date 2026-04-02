@@ -61,7 +61,7 @@ export default function QueryConstructor({
     };
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-color)', padding: '2rem' }}>
+        <div className="card" style={{ marginBottom: '1.5rem', padding: '2rem' }}>
             <div className="flex-between" style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div className="card-title" style={{ margin: 0, fontSize: '1rem' }}>Advanced Query Builder</div>
@@ -119,11 +119,11 @@ export default function QueryConstructor({
                                 </select>
                             </div>
                         )}
-                        <div className="glass-list-item" style={{ padding: '1.25rem', border: '1px solid var(--border-color)', position: 'relative', cursor: 'default', background: 'rgba(255,255,255,0.015)' }}>
+                        <div className="glass-list-item" style={{ padding: '1.25rem', border: '1px solid var(--border-color)', position: 'relative', cursor: 'default' }}>
                             <div className="flex-between" style={{ marginBottom: '1.25rem' }}>
                                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                                     <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>Group {groupIdx + 1}</span>
-                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', background: 'var(--accent-light)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
                                         <span className="micro-copy" style={{ fontSize: '0.65rem' }}>Logic:</span>
                                         <select className="filter-input" style={{ width: '60px', padding: '0', height: '20px', fontSize: '0.7rem', border: 'none', background: 'none' }} value={group.logic} onChange={(e) => updateLogic(group.id, e.target.value)}>
                                             <option value="AND">ALL</option>

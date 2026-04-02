@@ -18,16 +18,25 @@ export const STUDENT_SCHEMA = [
 
 export const CLUB_SCHEMA = [
     { key: 'name', label: 'Organization' },
-    { key: 'type', label: 'Type' },
     { key: 'category', label: 'Category' },
-    { key: 'founded', label: 'Est.' },
+    { key: 'lead', label: 'Lead' },
+    { key: 'established', label: 'Est.' },
     { key: 'members_count', label: 'Members' },
-    { key: 'leadership_count', label: 'Core Team' },
-    { key: 'applications_2024', label: '2024 Apps' },
-    { key: 'rejections_2024', label: '2024 Rejects' },
+    { key: 'applicants_count', label: 'Applicants' },
     { key: 'acceptance_rate', label: 'Accept %' },
     { key: 'budget_total', label: 'Budget (₹)' },
     { key: 'budget_used', label: 'Used (₹)' },
-    { key: 'budget_days_elapsed', label: 'Days Elapsed' },
-    { key: 'status', label: 'Status' },
+    { key: 'recruitment_status', label: 'Recruitment' },
+    { key: 'grievances_count', label: 'Grievances' },
+    {
+        key: 'avg_engagement',
+        label: 'Engagement Index',
+        tooltip: 'Average frequency of attendance across all registered members (0-10 scale)'
+    },
+    {
+        key: 'diversity_score',
+        label: 'Diversity Index',
+        tooltip: 'Weighted metric based on major, batch, and gender distribution'
+    },
+    { key: 'governance_rating', label: 'Governance' },
 ];

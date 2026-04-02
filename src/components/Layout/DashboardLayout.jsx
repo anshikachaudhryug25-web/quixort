@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, CreditCard, Users, Activity, Calendar,
     MessageSquare, FileText, Plus, User, Compass, ShieldAlert,
-    Search, Bell
+    Search, Bell, Sun, Moon
 } from 'lucide-react';
 import { VIEWS } from '../../data/constants';
 
@@ -67,7 +67,7 @@ function Sidebar({ currentView }) {
     );
 }
 
-function Topbar({ currentView, handleViewChange }) {
+function Topbar({ currentView, handleViewChange, theme, toggleTheme }) {
     return (
         <header className="topbar">
             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
@@ -82,6 +82,9 @@ function Topbar({ currentView, handleViewChange }) {
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button className="btn btn-outline" style={{ border: 'none', padding: '0.5rem' }} onClick={toggleTheme}>
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
                 <button className="btn btn-outline" style={{ border: 'none', padding: '0.5rem' }}>
                     <Bell size={20} />
                 </button>
@@ -96,6 +99,16 @@ function Topbar({ currentView, handleViewChange }) {
 export default function DashboardLayout({ children, currentView, setView }) {
     const navigate = useNavigate();
 
+    // Set light mode as default
+    const [theme, setTheme] = React.useState(() => localStorage.getItem('theme') || 'light');
+
+    React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+
     const handleViewChange = (e) => {
         const newView = e.target.value;
         setView(newView);
@@ -108,7 +121,12 @@ export default function DashboardLayout({ children, currentView, setView }) {
         <div className="app-container">
             <Sidebar currentView={currentView} />
             <main className="main-content">
-                <Topbar currentView={currentView} handleViewChange={handleViewChange} />
+                <Topbar
+                    currentView={currentView}
+                    handleViewChange={handleViewChange}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
+                />
                 <div className="page-container flex-1">
                     {children}
                 </div>

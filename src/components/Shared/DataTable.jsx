@@ -1,10 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { Settings } from 'lucide-react';
+import MetricTooltip from './MetricTooltip';
 
 export default function DataTable({ data, schema, title, onRowClick }) {
     const [visibleColumns, setVisibleColumns] = useState(schema.map(s => s.key));
     const [showConfig, setShowConfig] = useState(false);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+    // Sync columns when schema changes
+    React.useEffect(() => {
+        setVisibleColumns(schema.map(s => s.key));
+    }, [schema]);
 
     const toggleColumn = (key) => {
         setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -62,6 +68,7 @@ export default function DataTable({ data, schema, title, onRowClick }) {
                                 <th key={s.key} onClick={() => setSortConfig({ key: s.key, direction: sortConfig.key === s.key && sortConfig.direction === 'asc' ? 'desc' : 'asc' })} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                         {s.label}
+                                        {s.tooltip && <MetricTooltip formula={s.tooltip} />}
                                         {sortConfig.key === s.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                     </div>
                                 </th>
@@ -71,14 +78,45 @@ export default function DataTable({ data, schema, title, onRowClick }) {
                     <tbody>
                         {sortedData.map((row, i) => (
                             <tr key={i} onClick={() => onRowClick && onRowClick(row)} style={{ cursor: onRowClick ? 'pointer' : 'default' }}>
-                                {schema.filter(s => visibleColumns.includes(s.key)).map(s => (
-                                    <td key={s.key}>
-                                        {s.key === 'status' ? getStatusBadge(row[s.key]) :
-                                            s.key.includes('rate') || s.key.includes('%') ? <span style={{ fontWeight: 700, color: row[s.key] > 80 ? 'var(--success-color)' : row[s.key] < 20 ? 'var(--danger-color)' : 'inherit' }}>{row[s.key]}%</span> :
-                                                Array.isArray(row[s.key]) ? <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>{row[s.key].slice(0, 3).map(v => <span className="badge outline" style={{ fontSize: '0.6rem' }} key={v}>{v}</span>)}{row[s.key].length > 3 && <span className="micro-copy">+{row[s.key].length - 3}</span>}</div> :
-                                                    row[s.key]?.toString() || '-'}
-                                    </td>
-                                ))}
+                                {schema.filter(s => visibleColumns.includes(s.key)).map(s => {
+                                    const val = row[s.key];
+                                    return (
+                                        <td key={s.key}>
+                                            {s.key === 'status' || s.key === 'recruitment_status' ? getStatusBadge(val) :
+                                                s.key === 'risk_profile' ? (
+                                                    <span className={`badge ${val === 'Low' ? 'success' : val === 'Moderate' ? 'warning' : 'danger'}`} style={{ fontSize: '0.6rem' }}>
+                                                        {val} Risk
+                                                    </span>
+                                                ) :
+                                                    s.key.includes('budget') || s.key.includes('amount') ? (
+                                                        <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>₹{val.toLocaleString()}</span>
+                                                    ) :
+                                                        s.key.includes('rate') || s.key.includes('_score') || s.key.includes('_index') || s.key.includes('%') ? (
+                                                            <span style={{
+                                                                fontWeight: 700,
+                                                                color: val > 80 ? 'var(--success-color)' : val < 20 ? 'var(--danger-color)' : 'inherit'
+                                                            }}>
+                                                                {val}{typeof val === 'number' && !s.key.includes('score') && !s.key.includes('rating') ? '%' : ''}
+                                                            </span>
+                                                        ) :
+                                                            s.key === 'governance_rating' ? (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                                    <span style={{ fontWeight: 800 }}>{val}</span>
+                                                                    <div style={{ width: '40px', height: '4px', background: 'var(--border-color)', borderRadius: '2px' }}>
+                                                                        <div style={{ width: `${(val / 5) * 100}%`, height: '100%', background: val > 4 ? 'var(--success-color)' : 'var(--warning-color)', borderRadius: '2px' }} />
+                                                                    </div>
+                                                                </div>
+                                                            ) :
+                                                                Array.isArray(val) ? (
+                                                                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                                                                        {val.slice(0, 3).map(v => <span className="badge outline" style={{ fontSize: '0.6rem' }} key={v}>{v}</span>)}
+                                                                        {val.length > 3 && <span className="micro-copy">+{val.length - 3}</span>}
+                                                                    </div>
+                                                                ) :
+                                                                    val?.toString() || '-'}
+                                        </td>
+                                    );
+                                })}
                             </tr>
                         ))}
                     </tbody>

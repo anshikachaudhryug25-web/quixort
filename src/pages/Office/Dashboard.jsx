@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Search, AlertTriangle, Activity, Info } from 'lucide-react';
+import { Search, AlertTriangle, Activity, Info, Plus, X as XIcon, Trash2, Filter } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { MOCK_STUDENTS, MOCK_CLUBS } from '../../data/mockData';
 import MetricTooltip from '../../components/Shared/MetricTooltip';
+import { ALL_QUICK_FILTERS } from '../../data/quickFilters';
 
 // ── Derived metrics ──────────────────────────────────────────────────────────
 function useDerivedMetrics() {
@@ -36,8 +37,9 @@ function useDerivedMetrics() {
         // Polar tables
         const totalRejects = MOCK_STUDENTS.filter(s => s.acceptance_rate === 0 && s.applications >= 3);
         const perfectRecord = MOCK_STUDENTS.filter(s => s.acceptance_rate === 100 && s.applications >= 1);
+        const zeroApps = MOCK_STUDENTS.filter(s => s.applications === 0);
 
-        return { inclusivityIndex, uniqueLeaders, totalPositions, powerConc, budgetVelocities, isolationRisk, overloaded, topStudents, totalStudents, totalRejects, perfectRecord };
+        return { inclusivityIndex, uniqueLeaders, totalPositions, powerConc, budgetVelocities, isolationRisk, overloaded, topStudents, totalStudents, totalRejects, perfectRecord, zeroApps };
     }, []);
 }
 
@@ -489,11 +491,175 @@ function ClubOverlapCalculator() {
     );
 }
 
+function ZeroAppsWidget({ students }) {
+    return (
+        <div className="card" style={{ marginTop: '1.5rem', marginBottom: '3rem', borderTop: '4px solid var(--text-muted)' }}>
+            <div className="flex-between" style={{ marginBottom: '1.25rem' }}>
+                <div>
+                    <div className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>●</span> Zero Application Audit
+                    </div>
+                    <p className="micro-copy" style={{ marginTop: '0.25rem' }}>
+                        Students who have not initiated any applications this cycle.
+                    </p>
+                </div>
+                <MetricTooltip formula={"Students where:\napplications = 0\n\nThese students are completely\ninactive in the club ecosystem."} />
+            </div>
+
+            <div className="data-table-container" style={{ margin: '0 -1.5rem', width: 'calc(100% + 3rem)' }}>
+                <table className="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th><th>Batch</th><th>Major</th><th>Minor</th><th>Last Active</th><th>Inactivity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {students.length === 0 ? (
+                            <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>All students have submitted at least one application.</td></tr>
+                        ) : students.map(s => (
+                            <tr key={s.id}>
+                                <td style={{ fontWeight: 700 }}>{s.name}</td>
+                                <td>{s.batch}</td>
+                                <td>{s.major}</td>
+                                <td>{s.minor || <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
+                                <td>{60 - s.days_since_last_activity} days ago</td>
+                                <td>
+                                    <span style={{
+                                        fontWeight: 700,
+                                        color: s.days_since_last_activity > 30 ? 'var(--danger-color)' : 'var(--warning-color)'
+                                    }}>
+                                        {s.days_since_last_activity}d
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+function DynamicFilterWidget({ filter, onRemove }) {
+    const evaluateGroup = (row, group) => {
+        if (group.logic === 'AND') {
+            return group.filters.every(f => applyFilter(row, f));
+        } else {
+            return group.filters.some(f => applyFilter(row, f));
+        }
+    };
+
+    const applyFilter = (row, f) => {
+        if (f.value === undefined || f.value === '') return true;
+        let val = row[f.field];
+        if (Array.isArray(val)) val = val.length.toString();
+        else val = val?.toString().toLowerCase() || '';
+        const target = f.value.toLowerCase();
+        switch (f.operator) {
+            case 'EQUALS': return val == target;
+            case 'NOT_EQUALS': return val != target;
+            case 'CONTAINS': return val.includes(target);
+            case 'GREATER_THAN': return parseFloat(val) > parseFloat(target);
+            case 'LESS_THAN': return parseFloat(val) < parseFloat(target);
+            default: return true;
+        }
+    };
+
+    const matchingRows = useMemo(() => {
+        return filter.data.filter(row => {
+            if (filter.fullQuery) {
+                const { groups, logic } = filter.fullQuery;
+                return logic === 'AND'
+                    ? groups.every(g => evaluateGroup(row, g))
+                    : groups.some(g => evaluateGroup(row, g));
+            }
+            return filter.filters.every(f => applyFilter(row, f));
+        });
+    }, [filter]);
+
+    return (
+        <div className="card" style={{ marginTop: '1.5rem', borderLeft: '4px solid var(--accent-color)' }}>
+            <div className="flex-between" style={{ marginBottom: '1rem' }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <div className="card-title" style={{ margin: 0 }}>{filter.label}</div>
+                        <span className="badge accent" style={{ fontSize: '0.55rem' }}>Dynamic Widget</span>
+                    </div>
+                    <p className="micro-copy" style={{ marginTop: '0.25rem' }}>{filter.description}</p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <div className="micro-copy font-bold">{matchingRows.length} matches</div>
+                    <button
+                        onClick={() => onRemove(filter.id)}
+                        className="btn btn-outline"
+                        style={{ padding: '0.3rem', color: 'var(--danger-color)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                </div>
+            </div>
+
+            <div className="data-table-container" style={{ margin: '0 -1.5rem', width: 'calc(100% + 3rem)' }}>
+                <table className="data-table">
+                    <thead>
+                        <tr>
+                            {filter.schema.slice(0, 5).map(s => <th key={s.key}>{s.label}</th>)}
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {matchingRows.length === 0 ? (
+                            <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>No matching records found.</td></tr>
+                        ) : matchingRows.slice(0, 10).map((row, i) => (
+                            <tr key={i}>
+                                {filter.schema.slice(0, 5).map(s => (
+                                    <td key={s.key} style={{ fontWeight: s.key === 'name' ? 700 : 400 }}>
+                                        {row[s.key]}
+                                    </td>
+                                ))}
+                                <td>
+                                    <span className={`badge ${row.status === 'Isolation Risk' || row.status === 'At Risk' ? 'danger' : row.status === 'Active' || row.status === 'Healthy' ? 'success' : 'outline'}`} style={{ fontSize: '0.6rem' }}>
+                                        {row.status || 'Active'}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                {matchingRows.length > 10 && (
+                    <div className="micro-copy" style={{ textAlign: 'center', padding: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
+                        + {matchingRows.length - 10} more rows
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ── Main Dashboard ───────────────────────────────────────────────────────────
-export default function OfficeDashboard() {
+function OfficeDashboard() {
     const metrics = useDerivedMetrics();
-    const { inclusivityIndex, uniqueLeaders, totalPositions, powerConc, budgetVelocities, isolationRisk, overloaded, topStudents, totalStudents, totalRejects, perfectRecord } = metrics;
+    const { inclusivityIndex, uniqueLeaders, totalPositions, powerConc, budgetVelocities, isolationRisk, overloaded, topStudents, totalStudents, totalRejects, perfectRecord, zeroApps } = metrics;
     const insights = generateInsights(metrics);
+
+    const [customWidgets, setCustomWidgets] = useState(() => {
+        const saved = localStorage.getItem('dashboard_custom_widgets');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [showPicker, setShowPicker] = useState(false);
+
+    const addWidget = (filter) => {
+        const next = [...customWidgets, { ...filter, id: Date.now() }];
+        setCustomWidgets(next);
+        localStorage.setItem('dashboard_custom_widgets', JSON.stringify(next));
+        setShowPicker(false);
+    };
+
+    const removeWidget = (id) => {
+        const next = customWidgets.filter(w => w.id !== id);
+        setCustomWidgets(next);
+        localStorage.setItem('dashboard_custom_widgets', JSON.stringify(next));
+    };
 
     const cohortData = [
         { name: 'UG23', active: 85, passive: 15 },
@@ -509,14 +675,17 @@ export default function OfficeDashboard() {
                     <p>Strategic oversight of campus engagement, social health, and fiscal distribution.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button className="btn btn-outline" onClick={() => setShowPicker(true)}>
+                        <Plus size={16} style={{ marginRight: '0.4rem' }} /> Create Widget
+                    </button>
                     <button className="btn btn-outline"><Search size={16} /> Audit Logs</button>
-                    <button className="btn btn-primary">Generate Proposal</button>
+                    <button className="btn btn-primary">Download Report</button>
                 </div>
             </div>
 
             {/* KPI Row */}
             <div className="grid-cols-4" style={{ marginBottom: '2rem' }}>
-                <div className="card" style={{ padding: '1.25rem', borderBottom: '3px solid var(--success-color)' }}>
+                <div className="card">
                     <div className="micro-copy font-bold text-muted" style={{ display: 'flex', alignItems: 'center' }}>
                         Inclusivity Index
                         <MetricTooltip formula={`Students with ≥1 club membership ÷ Total students\n= ${MOCK_STUDENTS.filter(s => s.joined.length > 0).length} ÷ ${totalStudents} = ${inclusivityIndex}%`} />
@@ -524,7 +693,7 @@ export default function OfficeDashboard() {
                     <div className="stat-value" style={{ fontSize: '1.75rem', color: 'var(--success-color)' }}>{inclusivityIndex}%</div>
                     <p className="micro-copy">Unique student participation rate</p>
                 </div>
-                <div className="card" style={{ padding: '1.25rem', borderBottom: '3px solid var(--danger-color)' }}>
+                <div className="card">
                     <div className="micro-copy font-bold text-muted" style={{ display: 'flex', alignItems: 'center' }}>
                         Power Concentration
                         <MetricTooltip formula={`Unique leaders ÷ Total leadership positions filled\n= ${uniqueLeaders} unique ÷ ${totalPositions} positions = ${powerConc}\n\nLower value = fewer people hold more power.\nIdeal: >0.6`} />
@@ -532,7 +701,7 @@ export default function OfficeDashboard() {
                     <div className="stat-value" style={{ fontSize: '1.75rem', color: 'var(--danger-color)' }}>{powerConc}</div>
                     <p className="micro-copy">{uniqueLeaders} unique leaders / {totalPositions} positions</p>
                 </div>
-                <div className="card" style={{ padding: '1.25rem', borderBottom: '3px solid var(--warning-color)' }}>
+                <div className="card">
                     <div className="micro-copy font-bold text-muted" style={{ display: 'flex', alignItems: 'center' }}>
                         Isolation Risk
                         <MetricTooltip formula={`Students where:\n  acceptance_rate = 0%\n  AND applications ≥ 1\n\nCurrently: ${isolationRisk.length} students`} />
@@ -540,7 +709,7 @@ export default function OfficeDashboard() {
                     <div className="stat-value" style={{ fontSize: '1.75rem', color: 'var(--danger-color)' }}>{isolationRisk.length}</div>
                     <p className="micro-copy">Students with 0 accepted memberships</p>
                 </div>
-                <div className="card" style={{ padding: '1.25rem', borderBottom: '3px solid var(--accent-color)' }}>
+                <div className="card">
                     <div className="micro-copy font-bold text-muted" style={{ display: 'flex', alignItems: 'center' }}>
                         Role Overloading
                         <MetricTooltip formula={`Students holding leadership in ≥3 clubs\nat the same time.\n\nCurrently: ${overloaded.length} students flagged`} />
@@ -552,7 +721,7 @@ export default function OfficeDashboard() {
 
             {/* AI Feed + Budget + Cohort Chart */}
             <div className="grid-cols-2" style={{ gap: '2rem', marginBottom: '2rem' }}>
-                <div className="card" style={{ borderLeft: '4px solid var(--accent-color)', display: 'flex', flexDirection: 'column', maxHeight: '520px' }}>
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', maxHeight: '520px' }}>
                     <div className="flex-between" style={{ marginBottom: '1rem', flexShrink: 0 }}>
                         <div>
                             <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
@@ -595,7 +764,7 @@ export default function OfficeDashboard() {
             {/* Deep-Dive Analytics: Risk & Concentration */}
             <div className="grid-cols-2" style={{ gap: '2rem', marginBottom: '2rem' }}>
                 {/* RISK HUB: Isolation & Rejection */}
-                <div className="card" style={{ borderTop: '4px solid var(--danger-color)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <section>
                         <div className="flex-between mb-4">
                             <h3 className="section-title" style={{ fontSize: '0.9rem' }}>Immediate Isolation Risk</h3>
@@ -725,11 +894,59 @@ export default function OfficeDashboard() {
                 </div>
             </div>
 
+            {/* Custom Dynamic Widgets */}
+            {customWidgets.map(widget => (
+                <DynamicFilterWidget key={widget.id} filter={widget} onRemove={removeWidget} />
+            ))}
+
+            {/* Zero application pool */}
+            <ZeroAppsWidget students={zeroApps} />
+
             {/* Network graph */}
             <ClubNetworkGraph />
 
             {/* Overlap Calculator */}
             <ClubOverlapCalculator />
+
+            {/* Widget Picker Modal */}
+            {showPicker && ReactDOM.createPortal(
+                <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }} onClick={() => setShowPicker(false)} />
+                    <div className="card" style={{
+                        position: 'relative', width: '600px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        animation: 'modalFadeUp 0.3s ease-out', border: '1px solid var(--accent-color)'
+                    }}>
+                        <div className="flex-between" style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Add Intelligence Widget</h2>
+                                <p className="micro-copy">Select a quick filter to pin as a widget on your home dashboard.</p>
+                            </div>
+                            <button className="btn btn-outline" style={{ borderRadius: '50%', width: '36px', height: '36px', padding: 0 }} onClick={() => setShowPicker(false)}>
+                                <XIcon size={18} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '1.5rem', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                            {ALL_QUICK_FILTERS.map((f, i) => (
+                                <div key={i} className="glass-list-item" style={{ cursor: 'pointer', textAlign: 'left' }} onClick={() => addWidget(f)}>
+                                    <div style={{ fontWeight: 800, fontSize: '0.75rem', color: 'var(--accent-color)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Filter size={12} /> {f.label.toUpperCase()}
+                                    </div>
+                                    <p style={{ fontSize: '0.7rem', margin: 0, color: 'var(--text-muted)' }}>{f.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <style>{`
+                        @keyframes modalFadeUp {
+                            from { opacity: 0; transform: translateY(20px); }
+                            to { opacity: 1; transform: translateY(0); }
+                        }
+                    `}</style>
+                </div>,
+                document.body
+            )}
         </>
     );
 }
+
+export default OfficeDashboard;

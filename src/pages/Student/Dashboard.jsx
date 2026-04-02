@@ -14,8 +14,7 @@ export default function StudentDashboard() {
 
     const mentorshipSlots = [
         { type: 'Application Review', duration: '20 mins', icon: <FileText size={16} /> },
-        { type: 'Mock Interview Prep', duration: '30 mins', icon: <Users size={16} /> },
-        { type: 'Skill Alignment IQ', duration: '15 mins', icon: <Activity size={16} /> }
+        { type: 'SLAB Mentorship (Student Life Activities Board)', duration: '30 mins', icon: <Users size={16} /> }
     ];
 
     return (
@@ -34,7 +33,7 @@ export default function StudentDashboard() {
 
             <div className="grid-cols-3" style={{ gridTemplateColumns: 'minmax(0, 1fr) 350px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', gridColumn: 'span 2' }}>
-                    <div className="card" style={{ borderLeft: '4px solid var(--accent-color)' }}>
+                    <div className="card">
                         <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
                             <div>
                                 <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -93,7 +92,7 @@ export default function StudentDashboard() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '2rem' }}>
-                <div className="card" style={{ borderTop: '4px solid var(--warning-color)' }}>
+                <div className="card">
                     <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <ShieldAlert size={18} color="var(--warning-color)" /> Office Mentorship (OH)
                     </div>
