@@ -537,17 +537,20 @@ p {
 /* Glassy lists for feedback */
 .glass-list-item {
   padding: 0.875rem 1rem;
-  background: var(--border-color);
+  background: var(--bg-color);
   border: 1px solid var(--border-color);
   margin-bottom: 0.5rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  opacity: 0.9;
 }
 
 .glass-list-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--accent-light);
+  border-color: var(--accent-color);
+  transform: translateX(4px);
+  opacity: 1;
 }
 
 /* Table Styles */
@@ -669,17 +672,19 @@ p {
 }
 
 .filter-input {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-color);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 0.5rem 0.875rem;
   border-radius: 0.5rem;
   font-size: 0.8125rem;
   outline: none;
+  transition: all 0.2s;
 }
 
 .filter-input:focus {
   border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--accent-light);
 }
 
 .column-config-dropdown {
@@ -689,7 +694,8 @@ p {
   z-index: 100;
   width: 250px;
   padding: 1.25rem;
-  background: #161823;
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   box-shadow: var(--shadow-lg);
